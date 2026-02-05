@@ -1,7 +1,6 @@
 package com.gustavosiqueira.payment.wallet.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,15 +19,17 @@ public class WalletReservation {
 
     @Id
     private UUID id;
-    private UUID transaction_id;
+    @Column(name = "transaction_id")
+    private UUID transactionId;
     private BigDecimal amount;
+    @Enumerated(EnumType.STRING)
     private WalletReservationStatus status;
     private Instant created_at;
 
     public static WalletReservation from(UUID transactionId, BigDecimal amount, WalletReservationStatus status, Instant createdAt) {
         return WalletReservation.builder()
                 .id(UUID.randomUUID())
-                .transaction_id(transactionId)
+                .transactionId(transactionId)
                 .amount(amount)
                 .status(status)
                 .created_at(createdAt)
