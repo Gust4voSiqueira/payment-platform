@@ -1,6 +1,6 @@
 package com.gustavosiqueira.payment.wallet.adapters.out.messaging;
 
-import com.gustavosiqueira.payment.wallet.application.event.WalletCreatedEvent;
+import com.gustavosiqueira.payment.wallet.application.event.WalletBalanceReservedEvent;
 import com.gustavosiqueira.payment.wallet.application.ports.out.WalletEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -18,7 +18,7 @@ public class KafkaWalletEventPublisher implements WalletEventPublisher {
     private static final String BINDING_NAME = "walletCreated-out-0";
 
     @Override
-    public void walletCreated(WalletCreatedEvent event, String eventType) {
+    public void walletCreated(WalletBalanceReservedEvent event, String eventType) {
         var message = MessageBuilder.withPayload(event)
                 .setHeader("event_type", eventType)
                 .setHeader("event_version", EVENT_VERSION)

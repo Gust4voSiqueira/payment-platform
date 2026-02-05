@@ -1,8 +1,8 @@
 package com.gustavosiqueira.payment.wallet.application.ports.out;
 
-import com.gustavosiqueira.payment.wallet.application.event.WalletCreatedEvent;
+import com.gustavosiqueira.payment.wallet.application.event.WalletBalanceReservedEvent;
 
 public interface WalletEventPublisher {
 
-    void walletCreated(WalletCreatedEvent event, String eventType);
+    void walletCreated(WalletBalanceReservedEvent event, String eventType);
 }
