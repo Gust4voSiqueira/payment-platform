@@ -1,7 +1,9 @@
 package com.gustavosiqueira.payment.fraud.application.use_case;
 
+import com.gustavosiqueira.payment.fraud.application.event.FraudDecisionEvent;
 import com.gustavosiqueira.payment.fraud.application.event.WalletBalanceReservedEvent;
 import com.gustavosiqueira.payment.fraud.application.ports.out.FraudAnalysisRepository;
+import com.gustavosiqueira.payment.fraud.application.ports.out.FraudDecisionEventPublisher;
 import com.gustavosiqueira.payment.fraud.domain.FraudDecision;
 import com.gustavosiqueira.payment.fraud.domain.FraudReason;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import static com.gustavosiqueira.payment.fraud.domain.FraudAnalysis.fromWalletB
 public class AnalysisFraudUseCase implements UseCase<WalletBalanceReservedEvent> {
 
     private final FraudAnalysisRepository fraudAnalysisRepository;
+    private final FraudDecisionEventPublisher fraudDecisionEventPublisher;
 
     public static final int SCORE_REVIEW = 40;
     public static final int SCORE_REJECTED = 70;
@@ -43,7 +46,16 @@ public class AnalysisFraudUseCase implements UseCase<WalletBalanceReservedEvent>
         var decision = decide(score);
         var reason = resolveReason(highValue, highRejected, highApproved);
 
-        saveAnalysis(input, decision, reason);
+        var analysis = fromWalletBalanceReservedEvent(input, decision, reason);
+        fraudAnalysisRepository.save(analysis);
+        var fraudDecisionEvent = new FraudDecisionEvent(
+                analysis.getTransactionId(),
+                UUID.randomUUID(),
+                score,
+                decision.name(),
+                analysis.getAnalyzedAt()
+        );
+        fraudDecisionEventPublisher.fraudDecision(fraudDecisionEvent);
     }
 
     private boolean isHighValue(BigDecimal reservedAmount) {
@@ -104,15 +116,5 @@ public class AnalysisFraudUseCase implements UseCase<WalletBalanceReservedEvent>
         }
 
         return FraudDecision.APPROVED;
-    }
-
-    private void saveAnalysis(
-            WalletBalanceReservedEvent input,
-            FraudDecision decision,
-            FraudReason reason
-    ) {
-        var analysis = fromWalletBalanceReservedEvent(input, decision, reason);
-
-        fraudAnalysisRepository.save(analysis);
     }
 }

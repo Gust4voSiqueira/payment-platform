@@ -25,6 +25,9 @@ spring:
           destination: payments.wallet.v1
           group: fraud-service
           content-type: application/json
+        fraudDecision-out-0:
+          destination: payments.fraud.v1
+          content-type: application/json
       kafka:
         binder:
           brokers: localhost:9092
