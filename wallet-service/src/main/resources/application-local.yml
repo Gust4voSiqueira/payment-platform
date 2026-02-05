@@ -25,7 +25,7 @@ spring:
           destination: payments.transaction.v1
           group: wallet-service
           content-type: application/json
-        walletCreated-out-0:
+        walletReserved-out-0:
           destination: payments.wallet.v1
           content-type: application/json
       kafka:
