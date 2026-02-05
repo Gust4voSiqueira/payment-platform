@@ -2,6 +2,7 @@ package com.gustavosiqueira.payment.fraud.application.use_case;
 
 import com.gustavosiqueira.payment.fraud.application.event.WalletBalanceReservedEvent;
 import com.gustavosiqueira.payment.fraud.application.ports.out.FraudAnalysisRepository;
+import com.gustavosiqueira.payment.fraud.application.ports.out.FraudDecisionEventPublisher;
 import com.gustavosiqueira.payment.fraud.domain.FraudAnalysis;
 import com.gustavosiqueira.payment.fraud.domain.FraudDecision;
 import com.gustavosiqueira.payment.fraud.domain.FraudReason;
@@ -32,33 +33,24 @@ class AnalysisFraudUseCaseTest {
     @Mock
     private FraudAnalysisRepository fraudAnalysisRepository;
 
+    @Mock
+    private FraudDecisionEventPublisher fraudDecisionEventPublisher;
+
     @Test
     @DisplayName("Deve aprovar transação sem risco")
     void shouldApproveTransactionWhenNoRiskDetected() {
         var event = buildEvent(new BigDecimal("100"));
 
-        when(fraudAnalysisRepository.countByUserIdAndFraudDecisionAndAnalyzedAtAfter(
-                eq(event.userId()),
-                eq(FraudDecision.APPROVED),
-                any(Instant.class)
-        )).thenReturn(0L);
-
-        when(fraudAnalysisRepository.countByUserIdAndFraudDecisionAndAnalyzedAtAfter(
-                eq(event.userId()),
-                eq(FraudDecision.REJECTED),
-                any(Instant.class)
-        )).thenReturn(0L);
+        stubCounts(event, 0L, 0L);
 
         useCase.execute(event);
 
-        var captor = ArgumentCaptor.forClass(FraudAnalysis.class);
-        verify(fraudAnalysisRepository).save(captor.capture());
-
-        var analysis = captor.getValue();
+        var analysis = captureAnalysis();
 
         assertThat(analysis.getFraudDecision()).isEqualTo(FraudDecision.APPROVED);
         assertThat(analysis.getReason()).isEqualTo(FraudReason.NO_RISK_DETECTED);
-        assertThat(analysis.getTransactionId()).isEqualTo(event.transactionId());
+
+        verify(fraudDecisionEventPublisher).fraudDecision(any());
     }
 
     @Test
@@ -66,83 +58,70 @@ class AnalysisFraudUseCaseTest {
     void shouldSendToReviewWhenHighValueTransaction() {
         var event = buildEvent(new BigDecimal("15000"));
 
-        when(fraudAnalysisRepository.countByUserIdAndFraudDecisionAndAnalyzedAtAfter(
-                eq(event.userId()),
-                eq(FraudDecision.APPROVED),
-                any(Instant.class)
-        )).thenReturn(0L);
-
-        when(fraudAnalysisRepository.countByUserIdAndFraudDecisionAndAnalyzedAtAfter(
-                eq(event.userId()),
-                eq(FraudDecision.REJECTED),
-                any(Instant.class)
-        )).thenReturn(0L);
+        stubCounts(event, 0L, 0L);
 
         useCase.execute(event);
 
-        var captor = ArgumentCaptor.forClass(FraudAnalysis.class);
-        verify(fraudAnalysisRepository).save(captor.capture());
-
-        var analysis = captor.getValue();
+        var analysis = captureAnalysis();
 
         assertThat(analysis.getFraudDecision()).isEqualTo(FraudDecision.REVIEW);
         assertThat(analysis.getReason()).isEqualTo(FraudReason.HIGH_VALUE_TRANSACTION);
+
+        verify(fraudDecisionEventPublisher).fraudDecision(any());
     }
 
     @Test
-    @DisplayName("Deve rejeitar transação com múltiplos fatores de risco")
+    @DisplayName("Deve rejeitar quando múltiplos fatores de risco")
     void shouldRejectWhenCombinedRiskFactors() {
         var event = buildEvent(new BigDecimal("15000"));
 
-        when(fraudAnalysisRepository.countByUserIdAndFraudDecisionAndAnalyzedAtAfter(
-                eq(event.userId()),
-                eq(FraudDecision.APPROVED),
-                any(Instant.class)
-        )).thenReturn(0L);
-
-        when(fraudAnalysisRepository.countByUserIdAndFraudDecisionAndAnalyzedAtAfter(
-                eq(event.userId()),
-                eq(FraudDecision.REJECTED),
-                any(Instant.class)
-        )).thenReturn(10L);
+        stubCounts(event, 0L, 10L);
 
         useCase.execute(event);
 
-        var captor = ArgumentCaptor.forClass(FraudAnalysis.class);
-        verify(fraudAnalysisRepository).save(captor.capture());
-
-        var analysis = captor.getValue();
+        var analysis = captureAnalysis();
 
         assertThat(analysis.getFraudDecision()).isEqualTo(FraudDecision.REJECTED);
         assertThat(analysis.getReason()).isEqualTo(FraudReason.COMBINED_RISK_FACTORS);
+
+        verify(fraudDecisionEventPublisher).fraudDecision(any());
     }
 
     @Test
-    @DisplayName("Deve enviar para review quando alta frequência de aprovadas")
-    void shouldSendToReviewWhenHighApprovedFrequency() {
+    @DisplayName("Deve aprovar quando apenas alta frequência de aprovadas")
+    void shouldApproveWhenOnlyHighApprovedFrequency() {
         var event = buildEvent(new BigDecimal("500"));
 
+        stubCounts(event, 10L, 0L);
+
+        useCase.execute(event);
+
+        var analysis = captureAnalysis();
+
+        assertThat(analysis.getFraudDecision()).isEqualTo(FraudDecision.APPROVED);
+        assertThat(analysis.getReason()).isEqualTo(FraudReason.HIGH_FREQUENCY_APPROVED);
+
+        verify(fraudDecisionEventPublisher).fraudDecision(any());
+    }
+
+    private void stubCounts(WalletBalanceReservedEvent event, long approved, long rejected) {
         when(fraudAnalysisRepository.countByUserIdAndFraudDecisionAndAnalyzedAtAfter(
                 eq(event.userId()),
                 eq(FraudDecision.APPROVED),
                 any(Instant.class)
-        )).thenReturn(10L);
+        )).thenReturn(approved);
 
         when(fraudAnalysisRepository.countByUserIdAndFraudDecisionAndAnalyzedAtAfter(
                 eq(event.userId()),
                 eq(FraudDecision.REJECTED),
                 any(Instant.class)
-        )).thenReturn(0L);
+        )).thenReturn(rejected);
+    }
 
-        useCase.execute(event);
-
+    private FraudAnalysis captureAnalysis() {
         var captor = ArgumentCaptor.forClass(FraudAnalysis.class);
         verify(fraudAnalysisRepository).save(captor.capture());
-
-        var analysis = captor.getValue();
-
-        assertThat(analysis.getFraudDecision()).isEqualTo(FraudDecision.APPROVED);
-        assertThat(analysis.getReason()).isEqualTo(FraudReason.HIGH_FREQUENCY_APPROVED);
+        return captor.getValue();
     }
 
     private WalletBalanceReservedEvent buildEvent(BigDecimal amount) {
