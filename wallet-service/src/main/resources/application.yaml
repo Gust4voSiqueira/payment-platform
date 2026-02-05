@@ -15,12 +15,15 @@ spring:
 
   cloud:
     function:
-      definition: transactionCreated
+      definition: transactionCreated; walletCreated
     stream:
       bindings:
         transactionCreated-in-0:
           destination: payments.transaction.v1
           group: wallet-service
+          content-type: application/json
+        walletCreated-out-0:
+          destination: payments.wallet.v1
           content-type: application/json
       kafka:
         binder:
