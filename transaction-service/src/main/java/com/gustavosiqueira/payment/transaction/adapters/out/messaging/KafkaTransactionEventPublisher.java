@@ -15,7 +15,7 @@ public class KafkaTransactionEventPublisher implements TransactionEventPublisher
 
     private static final String BINDING_NAME = "transactionCreated-out-0";
     private static final String SERVICE_NAME = "transaction-service";
-    private static final String EVENT_TYPE = "TransactionReserved";
+    private static final String EVENT_TYPE = "TRANSACTION_RESERVED";
     private static final Integer EVENT_VERSION = 1;
 
     @Override
