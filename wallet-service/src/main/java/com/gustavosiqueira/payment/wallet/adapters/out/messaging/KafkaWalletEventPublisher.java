@@ -15,10 +15,10 @@ public class KafkaWalletEventPublisher implements WalletEventPublisher {
 
     private static final Integer EVENT_VERSION = 1;
     private static final String SERVICE_NAME = "wallet-service";
-    private static final String BINDING_NAME = "walletCreated-out-0";
+    private static final String BINDING_NAME = "walletReserved-out-0";
 
     @Override
-    public void walletCreated(WalletBalanceReservedEvent event, String eventType) {
+    public void walletReserved(WalletBalanceReservedEvent event, String eventType) {
         var message = MessageBuilder.withPayload(event)
                 .setHeader("event_type", eventType)
                 .setHeader("event_version", EVENT_VERSION)

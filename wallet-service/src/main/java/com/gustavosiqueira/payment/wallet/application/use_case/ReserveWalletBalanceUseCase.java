@@ -69,7 +69,7 @@ public class ReserveWalletBalanceUseCase implements UseCase<TransactionCreatedEv
 
         walletReservationsRepository.save(reservation);
 
-        walletEventPublisher.walletCreated(
+        walletEventPublisher.walletReserved(
                 new WalletBalanceReservedEvent(
                         input.getTransactionId(),
                         input.getCorrelationId(),

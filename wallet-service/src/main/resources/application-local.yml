@@ -18,7 +18,7 @@ spring:
 
   cloud:
     function:
-      definition: transactionCreated; walletCreated
+      definition: transactionCreated; walletReserved
     stream:
       bindings:
         transactionCreated-in-0:

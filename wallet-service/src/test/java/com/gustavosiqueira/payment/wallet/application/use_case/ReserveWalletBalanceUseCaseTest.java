@@ -77,7 +77,7 @@ class ReserveWalletBalanceUseCaseTest {
 
         verify(walletsRepository).save(walletCaptor.capture());
         verify(walletReservationsRepository).save(reservationCaptor.capture());
-        verify(walletEventPublisher).walletCreated(eventCaptor.capture(), eq(BALANCE_RESERVED.name()));
+        verify(walletEventPublisher).walletReserved(eventCaptor.capture(), eq(BALANCE_RESERVED.name()));
 
         var savedWallet = walletCaptor.getValue();
         var reservation = reservationCaptor.getValue();
@@ -126,7 +126,7 @@ class ReserveWalletBalanceUseCaseTest {
 
         verify(walletsRepository, never()).save(any());
         verify(walletReservationsRepository).save(reservationCaptor.capture());
-        verify(walletEventPublisher).walletCreated(eventCaptor.capture(), eq(INSUFFICIENT_BALANCE.name()));
+        verify(walletEventPublisher).walletReserved(eventCaptor.capture(), eq(INSUFFICIENT_BALANCE.name()));
 
         var reservation = reservationCaptor.getValue();
         var publishedEvent = eventCaptor.getValue();

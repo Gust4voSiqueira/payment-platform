@@ -48,10 +48,10 @@ class KafkaWalletEventPublisherTest {
 
         var messageCaptor = ArgumentCaptor.forClass(Message.class);
 
-        kafkaWalletEventPublisher.walletCreated(event, eventType);
+        kafkaWalletEventPublisher.walletReserved(event, eventType);
 
         verify(streamBridge).send(
-                org.mockito.Mockito.eq("walletCreated-out-0"),
+                org.mockito.Mockito.eq("walletReserved-out-0"),
                 messageCaptor.capture()
         );
 
