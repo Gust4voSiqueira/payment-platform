@@ -24,15 +24,16 @@ public class WalletReservation {
     private BigDecimal amount;
     @Enumerated(EnumType.STRING)
     private WalletReservationStatus status;
-    private Instant created_at;
+    @Column(name = "created_at")
+    private Instant createdAt;
 
-    public static WalletReservation from(UUID transactionId, BigDecimal amount, WalletReservationStatus status, Instant createdAt) {
+    public static WalletReservation from(UUID id, UUID transactionId, BigDecimal amount, WalletReservationStatus status, Instant createdAt) {
         return WalletReservation.builder()
-                .id(UUID.randomUUID())
+                .id(id)
                 .transactionId(transactionId)
                 .amount(amount)
                 .status(status)
-                .created_at(createdAt)
+                .createdAt(createdAt)
                 .build();
     }
 }

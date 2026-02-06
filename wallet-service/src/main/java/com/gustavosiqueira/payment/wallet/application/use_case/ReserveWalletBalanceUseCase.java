@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 import static com.gustavosiqueira.payment.wallet.domain.Wallet.from;
 import static com.gustavosiqueira.payment.wallet.domain.WalletEventType.BALANCE_RESERVED;
@@ -33,7 +34,7 @@ public class ReserveWalletBalanceUseCase implements UseCase<TransactionCreatedEv
 
     @Override
     public void execute(TransactionCreatedEvent input) throws Exception {
-        var wallet = walletsRepository.findWalletsByUserId(input.getToWalletId())
+        var wallet = walletsRepository.findWalletsByUserId(input.getFromWalletId())
                 .orElseThrow(UserNotFoundException::new);
 
         var availableAfter = wallet.getAvailableBalance().subtract(input.getAmount());
@@ -53,6 +54,7 @@ public class ReserveWalletBalanceUseCase implements UseCase<TransactionCreatedEv
             walletsRepository.save(updatedWallet);
 
             reservation = from(
+                    UUID.randomUUID(),
                     input.getTransactionId(),
                     input.getAmount(),
                     WalletReservationStatus.RESERVED,
@@ -60,6 +62,7 @@ public class ReserveWalletBalanceUseCase implements UseCase<TransactionCreatedEv
             );
         } else {
             reservation = from(
+                    UUID.randomUUID(),
                     input.getTransactionId(),
                     input.getAmount(),
                     WalletReservationStatus.INSUFFICIENT_BALANCE,
@@ -73,7 +76,8 @@ public class ReserveWalletBalanceUseCase implements UseCase<TransactionCreatedEv
                 new WalletBalanceReservedEvent(
                         input.getTransactionId(),
                         input.getCorrelationId(),
-                        wallet.getUserId(),
+                        input.getFromWalletId(),
+                        input.getToWalletId(),
                         input.getAmount(),
                         CURRENCY_DEFAULT,
                         updatedWallet.getAvailableBalance(),
