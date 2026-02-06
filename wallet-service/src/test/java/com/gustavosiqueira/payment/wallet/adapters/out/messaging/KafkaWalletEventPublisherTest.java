@@ -37,6 +37,7 @@ class KafkaWalletEventPublisherTest {
                 transactionId,
                 correlationId,
                 UUID.randomUUID(),
+                UUID.randomUUID(),
                 BigDecimal.valueOf(100),
                 "BRL",
                 BigDecimal.valueOf(900),

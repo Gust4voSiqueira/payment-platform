@@ -106,13 +106,13 @@ class AnalysisFraudUseCaseTest {
 
     private void stubCounts(WalletBalanceReservedEvent event, long approved, long rejected) {
         when(fraudAnalysisRepository.countByUserIdAndFraudDecisionAndAnalyzedAtAfter(
-                eq(event.userId()),
+                eq(event.userFromId()),
                 eq(FraudDecision.APPROVED),
                 any(Instant.class)
         )).thenReturn(approved);
 
         when(fraudAnalysisRepository.countByUserIdAndFraudDecisionAndAnalyzedAtAfter(
-                eq(event.userId()),
+                eq(event.userFromId()),
                 eq(FraudDecision.REJECTED),
                 any(Instant.class)
         )).thenReturn(rejected);
@@ -126,6 +126,7 @@ class AnalysisFraudUseCaseTest {
 
     private WalletBalanceReservedEvent buildEvent(BigDecimal amount) {
         return new WalletBalanceReservedEvent(
+                UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(),

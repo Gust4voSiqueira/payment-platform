@@ -59,7 +59,7 @@ class KafkaTransactionEventPublisherTest {
 
         var headers = message.getHeaders();
 
-        assertThat(headers.get("event_type")).isEqualTo("TransactionReserved");
+        assertThat(headers.get("event_type")).isEqualTo("TRANSACTION_RESERVED");
         assertThat(headers.get("event_version")).isEqualTo(1);
         assertThat(headers.get("transaction_id")).isEqualTo(transactionId);
         assertThat(headers.get("correlation_id")).isEqualTo(correlationId);

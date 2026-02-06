@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -31,10 +32,15 @@ class KafkaFraudDecisionEventPublisherTest {
     void shouldPublishFraudDecisionEventWithRequiredHeaders() {
         var transactionId = UUID.randomUUID();
         var correlationId = UUID.randomUUID();
+        var userToId = UUID.randomUUID();
+        var userFromId = UUID.randomUUID();
 
         var event = new FraudDecisionEvent(
                 transactionId,
                 correlationId,
+                userToId,
+                userFromId,
+                BigDecimal.TEN,
                 20,
                 "REJECTED",
                 Instant.now()

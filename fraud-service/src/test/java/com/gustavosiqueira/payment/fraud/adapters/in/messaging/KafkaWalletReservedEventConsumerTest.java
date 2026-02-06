@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,22 +30,32 @@ class KafkaWalletReservedEventConsumerTest {
     @Test
     @DisplayName("Deve executar análise de fraude ao consumir WalletBalanceReservedEvent")
     void shouldExecuteFraudAnalysisWhenEventIsConsumed() {
-        var event = new WalletBalanceReservedEvent(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                new BigDecimal("1500"),
-                "BRL",
-                new BigDecimal("8500"),
-                new BigDecimal("1500"),
-                Instant.now()
-        );
+        var event = new Message<WalletBalanceReservedEvent>() {
+            @Override
+            public WalletBalanceReservedEvent getPayload() {
+                return new WalletBalanceReservedEvent(
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        new BigDecimal("1500"),
+                        "BRL",
+                        new BigDecimal("8500"),
+                        new BigDecimal("1500"),
+                        Instant.now()
+                );
+            }
 
-        Consumer<WalletBalanceReservedEvent> walletReservedConsumer =
-                consumer.walletReserved();
+            @Override
+            public MessageHeaders getHeaders() {
+                return null;
+            }
+        };
+
+        var walletReservedConsumer = consumer.walletReserved();
 
         walletReservedConsumer.accept(event);
 
-        verify(analysisFraudUseCase).execute(event);
+        verify(analysisFraudUseCase).execute(event.getPayload());
     }
 }
