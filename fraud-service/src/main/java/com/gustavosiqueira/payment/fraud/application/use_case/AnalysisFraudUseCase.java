@@ -36,8 +36,8 @@ public class AnalysisFraudUseCase implements UseCase<WalletBalanceReservedEvent>
         var score = 0;
 
         var highValue = isHighValue(input.reservedAmount());
-        var highRejected = isHighFrequencyRejected(input.userId());
-        var highApproved = isHighFrequencyApproved(input.userId());
+        var highRejected = isHighFrequencyRejected(input.userFromId());
+        var highApproved = isHighFrequencyApproved(input.userFromId());
 
         if (highValue) score += SCORE_HIGH_VALUE;
         if (highRejected) score += SCORE_HIGH_REJECTED;
@@ -51,6 +51,9 @@ public class AnalysisFraudUseCase implements UseCase<WalletBalanceReservedEvent>
         var fraudDecisionEvent = new FraudDecisionEvent(
                 analysis.getTransactionId(),
                 UUID.randomUUID(),
+                input.userFromId(),
+                input.userToId(),
+                input.reservedAmount(),
                 score,
                 decision.name(),
                 analysis.getAnalyzedAt()

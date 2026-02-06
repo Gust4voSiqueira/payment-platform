@@ -66,7 +66,7 @@ class ReserveWalletBalanceUseCaseTest {
                 1
         );
 
-        when(walletsRepository.findWalletsByUserId(userId))
+        when(walletsRepository.findWalletsByUserId(event.getFromWalletId()))
                 .thenReturn(Optional.of(wallet));
 
         reserveWalletBalanceUseCase.execute(event);
@@ -116,7 +116,7 @@ class ReserveWalletBalanceUseCaseTest {
                 1
         );
 
-        when(walletsRepository.findWalletsByUserId(userId))
+        when(walletsRepository.findWalletsByUserId(event.getFromWalletId()))
                 .thenReturn(Optional.of(wallet));
 
         reserveWalletBalanceUseCase.execute(event);
@@ -149,7 +149,7 @@ class ReserveWalletBalanceUseCaseTest {
                 1
         );
 
-        when(walletsRepository.findWalletsByUserId(event.getToWalletId()))
+        when(walletsRepository.findWalletsByUserId(eq(event.getFromWalletId())))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reserveWalletBalanceUseCase.execute(event))

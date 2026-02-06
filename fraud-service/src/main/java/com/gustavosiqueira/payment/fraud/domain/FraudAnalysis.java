@@ -53,7 +53,7 @@ public class FraudAnalysis {
         return FraudAnalysis.builder()
                 .id(UUID.randomUUID())
                 .transactionId(walletBalanceReservedEvent.transactionId())
-                .userId(walletBalanceReservedEvent.userId())
+                .userId(walletBalanceReservedEvent.userFromId())
                 .fraudDecision(fraudDecision)
                 .amount(walletBalanceReservedEvent.reservedAmount())
                 .reason(reason)

@@ -7,7 +7,8 @@ import java.util.UUID;
 public record WalletBalanceReservedEvent(
         UUID transactionId,
         UUID correlationId,
-        UUID userId,
+        UUID userFromId,
+        UUID userToId,
         BigDecimal reservedAmount,
         String currency,
         BigDecimal availableBalanceAfter,
