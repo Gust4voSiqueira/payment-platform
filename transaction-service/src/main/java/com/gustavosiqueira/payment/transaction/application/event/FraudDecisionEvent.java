@@ -1,4 +1,4 @@
-package com.gustavosiqueira.payment.wallet.application.event;
+package com.gustavosiqueira.payment.transaction.application.event;
 
 import java.math.BigDecimal;
 import java.time.Instant;
