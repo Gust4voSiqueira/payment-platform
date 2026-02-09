@@ -18,18 +18,14 @@ spring:
 
   cloud:
     function:
-      definition: transactionCreated; walletReserved; fraudDecision
+      definition: consumerTransaction; walletReserved; walletFinally
     stream:
       bindings:
-        transactionCreated-in-0:
+        consumerTransaction-in-0:
           destination: payments.transaction.v1
           group: wallet-service
           content-type: application/json
-        fraudDecision-in-0:
-          destination: payments.fraud.v1
-          group: wallet-service
-          content-type: application/json
-        walletReserved-out-0:
+        sendWallet-out-0:
           destination: payments.wallet.v1
           content-type: application/json
       kafka:

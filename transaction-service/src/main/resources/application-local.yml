@@ -17,11 +17,21 @@ spring:
         format_sql: true
 
   cloud:
+    function:
+      definition: transactionCreated; fraudDecision; transactionFinally
     stream:
       defaultBinder: kafka
       bindings:
-        transactionCreated-out-0:
+        sendTransaction-out-0:
           destination: payments.transaction.v1
+          content-type: application/json
+        fraudDecision-in-0:
+          destination: payments.fraud.v1
+          group: transaction-service
+          content-type: application/json
+        transactionFinally-in-0:
+          destination: payments.wallet.v1
+          group: transaction-service
           content-type: application/json
       kafka:
         binder:
