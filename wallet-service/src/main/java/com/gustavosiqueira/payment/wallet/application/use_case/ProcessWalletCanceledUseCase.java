@@ -48,7 +48,7 @@ public class ProcessWalletCanceledUseCase implements UseCase<TransactionCreatedE
                         input.amount(),
                         CURRENCY_DEFAULT,
                         walletFromUpdated.getAvailableBalance(),
-                        walletFrom.getReservedBalance(),
+                        walletFromUpdated.getReservedBalance(),
                         Instant.now()
                 ),
                 BALANCE_CANCELED.name()

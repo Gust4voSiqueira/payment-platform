@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import static com.gustavosiqueira.payment.wallet.application.use_case.ReserveWalletBalanceUseCase.CURRENCY_DEFAULT;
 import static com.gustavosiqueira.payment.wallet.domain.Wallet.from;
@@ -53,7 +52,7 @@ public class ProcessWalletConfirmedUseCase implements UseCase<TransactionCreated
                         input.amount(),
                         CURRENCY_DEFAULT,
                         walletFromUpdated.getAvailableBalance(),
-                        walletFrom.getReservedBalance(),
+                        walletFromUpdated.getReservedBalance(),
                         Instant.now()
                 ),
                 BALANCE_DEBITED.name()
