@@ -32,16 +32,16 @@ import static org.mockito.Mockito.*;
 class ReserveWalletBalanceUseCaseTest {
 
     @InjectMocks
-    ReserveWalletBalanceUseCase reserveWalletBalanceUseCase;
+    private ReserveWalletBalanceUseCase reserveWalletBalanceUseCase;
 
     @Mock
-    WalletsRepository walletsRepository;
+    private WalletsRepository walletsRepository;
 
     @Mock
-    WalletReservationsRepository walletReservationsRepository;
+    private WalletReservationsRepository walletReservationsRepository;
 
     @Mock
-    WalletEventPublisher walletEventPublisher;
+    private WalletEventPublisher walletEventPublisher;
 
     @Test
     @DisplayName("Deve reservar saldo quando houver saldo suficiente")
@@ -66,7 +66,7 @@ class ReserveWalletBalanceUseCaseTest {
                 1
         );
 
-        when(walletsRepository.findWalletsByUserId(event.getFromWalletId()))
+        when(walletsRepository.findWalletsByUserId(event.fromWalletId()))
                 .thenReturn(Optional.of(wallet));
 
         reserveWalletBalanceUseCase.execute(event);
@@ -77,7 +77,7 @@ class ReserveWalletBalanceUseCaseTest {
 
         verify(walletsRepository).save(walletCaptor.capture());
         verify(walletReservationsRepository).save(reservationCaptor.capture());
-        verify(walletEventPublisher).walletReserved(eventCaptor.capture(), eq(BALANCE_RESERVED.name()));
+        verify(walletEventPublisher).sendWallet(eventCaptor.capture(), eq(BALANCE_RESERVED.name()));
 
         var savedWallet = walletCaptor.getValue();
         var reservation = reservationCaptor.getValue();
@@ -116,7 +116,7 @@ class ReserveWalletBalanceUseCaseTest {
                 1
         );
 
-        when(walletsRepository.findWalletsByUserId(event.getFromWalletId()))
+        when(walletsRepository.findWalletsByUserId(event.fromWalletId()))
                 .thenReturn(Optional.of(wallet));
 
         reserveWalletBalanceUseCase.execute(event);
@@ -126,7 +126,7 @@ class ReserveWalletBalanceUseCaseTest {
 
         verify(walletsRepository, never()).save(any());
         verify(walletReservationsRepository).save(reservationCaptor.capture());
-        verify(walletEventPublisher).walletReserved(eventCaptor.capture(), eq(INSUFFICIENT_BALANCE.name()));
+        verify(walletEventPublisher).sendWallet(eventCaptor.capture(), eq(INSUFFICIENT_BALANCE.name()));
 
         var reservation = reservationCaptor.getValue();
         var publishedEvent = eventCaptor.getValue();
@@ -149,7 +149,7 @@ class ReserveWalletBalanceUseCaseTest {
                 1
         );
 
-        when(walletsRepository.findWalletsByUserId(eq(event.getFromWalletId())))
+        when(walletsRepository.findWalletsByUserId(eq(event.fromWalletId())))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reserveWalletBalanceUseCase.execute(event))
