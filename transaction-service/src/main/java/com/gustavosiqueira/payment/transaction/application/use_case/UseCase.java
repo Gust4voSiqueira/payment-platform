@@ -2,5 +2,5 @@ package com.gustavosiqueira.payment.transaction.application.use_case;
 
 public interface UseCase<I> {
 
-    void execute(I input);
+    void execute(I input) throws Exception;
 }
