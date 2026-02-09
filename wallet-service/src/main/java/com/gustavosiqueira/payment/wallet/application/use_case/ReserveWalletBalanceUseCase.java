@@ -30,14 +30,14 @@ public class ReserveWalletBalanceUseCase implements UseCase<TransactionCreatedEv
     private final WalletEventPublisher walletEventPublisher;
     private final WalletReservationsRepository walletReservationsRepository;
 
-    private static final String CURRENCY_DEFAULT = "BRL";
+    public static final String CURRENCY_DEFAULT = "BRL";
 
     @Override
     public void execute(TransactionCreatedEvent input) throws Exception {
-        var wallet = walletsRepository.findWalletsByUserId(input.getFromWalletId())
+        var wallet = walletsRepository.findWalletsByUserId(input.fromWalletId())
                 .orElseThrow(UserNotFoundException::new);
 
-        var availableAfter = wallet.getAvailableBalance().subtract(input.getAmount());
+        var availableAfter = wallet.getAvailableBalance().subtract(input.amount());
         var hasSufficientBalance = availableAfter.compareTo(BigDecimal.ZERO) >= 0;
 
         WalletReservation reservation;
@@ -48,23 +48,23 @@ public class ReserveWalletBalanceUseCase implements UseCase<TransactionCreatedEv
                     wallet.getId(),
                     wallet.getUserId(),
                     availableAfter,
-                    wallet.getReservedBalance().add(input.getAmount())
+                    wallet.getReservedBalance().add(input.amount())
             );
 
             walletsRepository.save(updatedWallet);
 
             reservation = from(
                     UUID.randomUUID(),
-                    input.getTransactionId(),
-                    input.getAmount(),
+                    input.transactionId(),
+                    input.amount(),
                     WalletReservationStatus.RESERVED,
                     Instant.now()
             );
         } else {
             reservation = from(
                     UUID.randomUUID(),
-                    input.getTransactionId(),
-                    input.getAmount(),
+                    input.transactionId(),
+                    input.amount(),
                     WalletReservationStatus.INSUFFICIENT_BALANCE,
                     Instant.now()
             );
@@ -72,13 +72,13 @@ public class ReserveWalletBalanceUseCase implements UseCase<TransactionCreatedEv
 
         walletReservationsRepository.save(reservation);
 
-        walletEventPublisher.walletReserved(
+        walletEventPublisher.sendWallet(
                 new WalletBalanceReservedEvent(
-                        input.getTransactionId(),
-                        input.getCorrelationId(),
-                        input.getFromWalletId(),
-                        input.getToWalletId(),
-                        input.getAmount(),
+                        input.transactionId(),
+                        input.correlationId(),
+                        input.fromWalletId(),
+                        input.toWalletId(),
+                        input.amount(),
                         CURRENCY_DEFAULT,
                         updatedWallet.getAvailableBalance(),
                         updatedWallet.getReservedBalance(),
