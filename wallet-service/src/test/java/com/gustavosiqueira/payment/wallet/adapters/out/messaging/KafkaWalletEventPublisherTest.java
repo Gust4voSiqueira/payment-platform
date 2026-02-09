@@ -16,16 +16,18 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class KafkaWalletEventPublisherTest {
 
     @InjectMocks
-    KafkaWalletEventPublisher kafkaWalletEventPublisher;
+    private KafkaWalletEventPublisher kafkaWalletEventPublisher;
 
     @Mock
-    StreamBridge streamBridge;
+    private StreamBridge streamBridge;
 
     @Test
     @DisplayName("Deve publicar evento de reserva criada com headers obrigatórios")
@@ -47,17 +49,16 @@ class KafkaWalletEventPublisherTest {
 
         var eventType = "BALANCE_RESERVED";
 
+        kafkaWalletEventPublisher.sendWallet(event, eventType);
+
         var messageCaptor = ArgumentCaptor.forClass(Message.class);
 
-        kafkaWalletEventPublisher.walletReserved(event, eventType);
-
         verify(streamBridge).send(
-                org.mockito.Mockito.eq("walletReserved-out-0"),
+                eq("walletReserved-out-0"),
                 messageCaptor.capture()
         );
 
         var message = messageCaptor.getValue();
-
         assertThat(message.getPayload()).isEqualTo(event);
 
         assertThat(message.getHeaders())

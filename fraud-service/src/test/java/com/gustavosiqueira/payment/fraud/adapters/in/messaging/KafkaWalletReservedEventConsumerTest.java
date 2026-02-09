@@ -8,13 +8,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import static org.mockito.Mockito.verify;
 
@@ -30,27 +29,21 @@ class KafkaWalletReservedEventConsumerTest {
     @Test
     @DisplayName("Deve executar análise de fraude ao consumir WalletBalanceReservedEvent")
     void shouldExecuteFraudAnalysisWhenEventIsConsumed() {
-        var event = new Message<WalletBalanceReservedEvent>() {
-            @Override
-            public WalletBalanceReservedEvent getPayload() {
-                return new WalletBalanceReservedEvent(
-                        UUID.randomUUID(),
-                        UUID.randomUUID(),
-                        UUID.randomUUID(),
-                        UUID.randomUUID(),
-                        new BigDecimal("1500"),
-                        "BRL",
-                        new BigDecimal("8500"),
-                        new BigDecimal("1500"),
-                        Instant.now()
-                );
-            }
-
-            @Override
-            public MessageHeaders getHeaders() {
-                return null;
-            }
-        };
+        var payload = new WalletBalanceReservedEvent(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                new BigDecimal("1500"),
+                "BRL",
+                new BigDecimal("8500"),
+                new BigDecimal("1500"),
+                Instant.now()
+        );
+        var event = MessageBuilder
+                .withPayload(payload)
+                .copyHeaders(Map.of("event_type", "BALANCE_RESERVED"))
+                .build();
 
         var walletReservedConsumer = consumer.walletReserved();
 

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.support.MessageBuilder;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -20,10 +21,10 @@ import static org.mockito.Mockito.*;
 class KafkaTransactionEventConsumerTest {
 
     @InjectMocks
-    KafkaTransactionEventConsumer kafkaTransactionEventConsumer;
+    private KafkaTransactionEventConsumer kafkaTransactionEventConsumer;
 
     @Mock
-    ReserveWalletBalanceUseCase reserveWalletBalanceUseCase;
+    private ReserveWalletBalanceUseCase reserveWalletBalanceUseCase;
 
     @Test
     @DisplayName("Deve consumir evento TransactionCreated e executar o use case")
@@ -38,9 +39,12 @@ class KafkaTransactionEventConsumerTest {
                 1
         );
 
-        var consumer = kafkaTransactionEventConsumer.transactionCreated();
+        var consumer = kafkaTransactionEventConsumer.consumerTransaction();
+        var message = MessageBuilder.withPayload(event)
+                .setHeader("event_type", "CREATED")
+                .build();
 
-        consumer.accept(event);
+        consumer.accept(message);
 
         verify(reserveWalletBalanceUseCase, times(1))
                 .execute(event);
@@ -63,9 +67,12 @@ class KafkaTransactionEventConsumerTest {
                 .when(reserveWalletBalanceUseCase)
                 .execute(event);
 
-        var consumer = kafkaTransactionEventConsumer.transactionCreated();
+        var consumer = kafkaTransactionEventConsumer.consumerTransaction();
+        var message = MessageBuilder.withPayload(event)
+                .setHeader("event_type", "CREATED")
+                .build();
 
-        assertThatThrownBy(() -> consumer.accept(event))
+        assertThatThrownBy(() -> consumer.accept(message))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Erro ao reservar saldo");
 
