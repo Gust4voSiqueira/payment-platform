@@ -18,7 +18,7 @@ public class KafkaWalletEventPublisher implements WalletEventPublisher {
     private static final String BINDING_NAME = "walletReserved-out-0";
 
     @Override
-    public void walletReserved(WalletBalanceReservedEvent event, String eventType) {
+    public void sendWallet(WalletBalanceReservedEvent event, String eventType) {
         var message = MessageBuilder.withPayload(event)
                 .setHeader("event_type", eventType)
                 .setHeader("event_version", EVENT_VERSION)

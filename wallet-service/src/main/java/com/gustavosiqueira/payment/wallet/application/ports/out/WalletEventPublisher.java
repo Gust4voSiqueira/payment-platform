@@ -4,5 +4,5 @@ import com.gustavosiqueira.payment.wallet.application.event.WalletBalanceReserve
 
 public interface WalletEventPublisher {
 
-    void walletReserved(WalletBalanceReservedEvent event, String eventType);
+    void sendWallet(WalletBalanceReservedEvent event, String eventType);
 }

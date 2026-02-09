@@ -3,6 +3,7 @@ package com.gustavosiqueira.payment.transaction.application.use_case;
 import com.gustavosiqueira.payment.transaction.adapters.in.controller.dto.CreateTransactionRequest;
 import com.gustavosiqueira.payment.transaction.application.ports.out.TransactionEventPublisher;
 import com.gustavosiqueira.payment.transaction.application.ports.out.TransactionRepository;
+import com.gustavosiqueira.payment.transaction.domain.TransactionStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,6 @@ public class CreateTransactionUseCase implements UseCase<CreateTransactionReques
         transactionRepository.save(transaction);
 
         var transactionCreatedEvent = fromTransaction(transaction, UUID.randomUUID(), DEFAULT_EVENT_VERSION);
-        transactionEventPublisher.transactionCreated(transactionCreatedEvent);
+        transactionEventPublisher.sendTransaction(transactionCreatedEvent, TransactionStatus.CREATED.name());
     }
 }

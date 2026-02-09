@@ -13,15 +13,14 @@ public class KafkaTransactionEventPublisher implements TransactionEventPublisher
 
     private final StreamBridge streamBridge;
 
-    private static final String BINDING_NAME = "transactionCreated-out-0";
+    private static final String BINDING_NAME = "sendTransaction-out-0";
     private static final String SERVICE_NAME = "transaction-service";
-    private static final String EVENT_TYPE = "TRANSACTION_RESERVED";
     private static final Integer EVENT_VERSION = 1;
 
     @Override
-    public void transactionCreated(TransactionCreatedEvent event) {
+    public void sendTransaction(TransactionCreatedEvent event, String eventType) {
         var message = MessageBuilder.withPayload(event)
-                        .setHeader("event_type", EVENT_TYPE)
+                        .setHeader("event_type", eventType)
                         .setHeader("event_version", EVENT_VERSION)
                         .setHeader("transaction_id", event.getTransactionId())
                         .setHeader("correlation_id", event.getCorrelationId())

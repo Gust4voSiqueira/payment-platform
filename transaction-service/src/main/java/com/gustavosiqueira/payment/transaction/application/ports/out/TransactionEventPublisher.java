@@ -4,5 +4,5 @@ import com.gustavosiqueira.payment.transaction.application.event.TransactionCrea
 
 public interface TransactionEventPublisher {
 
-    void transactionCreated(TransactionCreatedEvent event);
+    void sendTransaction(TransactionCreatedEvent event, String eventType);
 }
